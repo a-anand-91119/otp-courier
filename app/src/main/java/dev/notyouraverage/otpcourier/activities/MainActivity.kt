@@ -6,11 +6,12 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import dev.notyouraverage.otpcourier.composables.MainScreen
+import dev.notyouraverage.otpcourier.managers.DataStoreManager
 
 class MainActivity : ComponentActivity() {
-
     companion object {
         private val TAG by lazy { MainActivity::class.java.simpleName }
     }
@@ -36,10 +37,9 @@ class MainActivity : ComponentActivity() {
             arrayOf(
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.SEND_SMS,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
             ),
-            0
+            0,
         )
     }
-
 }

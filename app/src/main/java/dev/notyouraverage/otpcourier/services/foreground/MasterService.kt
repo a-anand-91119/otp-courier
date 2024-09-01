@@ -4,13 +4,16 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.provider.Telephony
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import dev.notyouraverage.otpcourier.R
+import dev.notyouraverage.otpcourier.constants.Constants
 import dev.notyouraverage.otpcourier.constants.Constants.CODE_FOREGROUND_SERVICE
 import dev.notyouraverage.otpcourier.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 import dev.notyouraverage.otpcourier.models.SmsMessageData
@@ -42,13 +45,6 @@ class MasterService : Service() {
         super.onCreate()
         Log.i(TAG, "MasterService::onCreate")
         if (this::smsReceiver.isInitialized) return
-
-        smsReceiver = SmsReceiver()
-        baseContext.registerReceiver(
-            smsReceiver,
-            IntentFilter("android.provider.Telephony.SMS_RECEIVED")
-        )
-
     }
 
     override fun onDestroy() {
@@ -62,7 +58,7 @@ class MasterService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "MasterService::onStartCommand")
         when (intent?.action) {
-            START_SELF -> startSelf()
+            START_SELF -> startSelf(intent.extras)
             STOP_SELF -> stopSelf()
             START_BACKGROUND -> startBackgroundService()
             STOP_BACKGROUND -> stopBackgroundService()
@@ -107,7 +103,16 @@ class MasterService : Service() {
         }
     }
 
-    private fun startSelf() {
+    private fun startSelf(extras: Bundle?) {
+        smsReceiver = SmsReceiver(
+            extras?.getString(Constants.SECRET_PASSWORD) ?: "",
+            extras?.getString(Constants.WHITE_LISTED_CONTACT_NUMBER) ?: ""
+        )
+        baseContext.registerReceiver(
+            smsReceiver,
+            IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
+        )
+
         Log.i(TAG, "MasterService::startingForegroundService")
         Toast.makeText(this, "Starting Foreground Service", Toast.LENGTH_SHORT).show()
         with(NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_GENERAL)) {

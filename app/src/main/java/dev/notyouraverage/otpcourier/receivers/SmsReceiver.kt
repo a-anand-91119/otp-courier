@@ -10,15 +10,17 @@ import dev.notyouraverage.otpcourier.enums.SmsCommand
 import dev.notyouraverage.otpcourier.models.SmsMessageData
 import dev.notyouraverage.otpcourier.services.foreground.MasterService
 
-class SmsReceiver : BroadcastReceiver() {
+class SmsReceiver(
+    private val secretPassword: String,
+    whiteListedContact: String,
+) : BroadcastReceiver() {
 
     companion object {
         private val TAG by lazy { SmsReceiver::class.java.simpleName }
     }
 
-    private val targetContacts = listOf("123", "123123")
+    private val targetContacts = listOf(whiteListedContact)
     private val commandPattern = Regex("OTPC\\s+(start|stop)\\s+(\\S+)")
-    private val secretPassword = "123123"
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return

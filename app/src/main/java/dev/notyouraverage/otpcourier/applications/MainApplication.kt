@@ -9,7 +9,6 @@ import android.util.Log
 import dev.notyouraverage.otpcourier.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 
 class MainApplication : Application() {
-
     companion object {
         private val TAG by lazy { MainApplication::class.java.simpleName }
     }
@@ -22,8 +21,8 @@ class MainApplication : Application() {
             NotificationChannel(
                 NOTIFICATION_CHANNEL_GENERAL,
                 "OTP Courier",
-                NotificationManager.IMPORTANCE_HIGH
-            )
+                NotificationManager.IMPORTANCE_HIGH,
+            ),
         ) {
             enableLights(false)
             setShowBadge(false)
@@ -38,5 +37,4 @@ class MainApplication : Application() {
         Log.i(TAG, "MainApplication::onTerminate")
         super.onTerminate()
     }
-
 }

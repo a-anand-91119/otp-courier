@@ -15,11 +15,7 @@ object Constants {
 
     const val NOTIFICATION_CHANNEL_GENERAL = "ListeningNotificationChannel"
     const val CODE_FOREGROUND_SERVICE = 1
-    const val CODE_REPLY_INTENT = 2
-    const val CODE_ACHIEVE_INTENT = 3
 
-    const val INTENT_COMMAND = "Command"
-    const val INTENT_COMMAND_EXIT = "Exit"
-    const val INTENT_COMMAND_REPLY = "Reply"
-    const val INTENT_COMMAND_ACHIEVE = "Achieve"
+    const val SECRET_PASSWORD = "SecretPassword"
+    const val WHITE_LISTED_CONTACT_NUMBER = "WhiteListedContactNumber"
 }

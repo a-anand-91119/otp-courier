@@ -11,13 +11,13 @@ spotless {
         licenseHeader '/* (C)$YEAR */'
     }
 
-//    kotlin {
-//        target '**/*.kt'
-//        ktlint()
-//        trimTrailingWhitespace()
-//        indentWithSpaces()
-//        endWithNewline()
-//    }
+    kotlin {
+        target '**/*.kt'
+        ktlint()
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
 
     format 'misc', {
         target '*.gradle', '*.md', '.gitignore'
