@@ -1,0 +1,28 @@
+spotless {
+    ratchetFrom 'origin/main'
+
+    java {
+        target '**/*.java'
+        googleJavaFormat().aosp() reflowLongStrings()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+        licenseHeader '/* (C)$YEAR */'
+    }
+
+//    kotlin {
+//        target '**/*.kt'
+//        ktlint()
+//        trimTrailingWhitespace()
+//        indentWithSpaces()
+//        endWithNewline()
+//    }
+
+    format 'misc', {
+        target '*.gradle', '*.md', '.gitignore'
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+}

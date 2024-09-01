@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "OTP Courier"
+rootProject.name = "SMS Courier"
 include(":app")
