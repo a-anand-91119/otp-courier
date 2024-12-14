@@ -18,4 +18,5 @@ object Constants {
 
     const val SECRET_PASSWORD = "SecretPassword"
     const val WHITE_LISTED_CONTACT_NUMBER = "WhiteListedContactNumber"
+    const val TARGET_SMS_CONTACT_NUMBER = "TargetSmsContactNumber"
 }

@@ -6,9 +6,11 @@ import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import android.util.Log
+import android.widget.Toast
 import dev.notyouraverage.otpcourier.enums.SmsCommand
 import dev.notyouraverage.otpcourier.models.SmsMessageData
 import dev.notyouraverage.otpcourier.services.foreground.MasterService
+import dev.notyouraverage.otpcourier.services.foreground.MasterService.Companion
 
 class SmsReceiver(
     private val secretPassword: String,
@@ -23,11 +25,28 @@ class SmsReceiver(
     private val commandPattern = Regex("OTPC\\s+(start|stop)\\s+(\\S+)")
 
     override fun onReceive(context: Context?, intent: Intent?) {
+        Log.i(TAG, "Using whitelisted numbers as $targetContacts")
+
         if (intent?.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
         val extractMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
+        Log.i(
+            TAG,
+            "Received sms from ${processOriginatingAddress(extractMessages[0].originatingAddress)}"
+        )
+        Toast.makeText(
+            context,
+            "Received sms from ${processOriginatingAddress(extractMessages[0].originatingAddress)}",
+            Toast.LENGTH_SHORT
+        ).show()
         val commandMessage =
-            extractMessages.filter { message -> targetContacts.contains(message.originatingAddress) }
+            extractMessages.filter { message ->
+                targetContacts.contains(
+                    processOriginatingAddress(
+                        message.originatingAddress
+                    )
+                )
+            }
                 .firstOrNull { message -> matchesCommandPattern(message.messageBody.trim()) }
 
         if (commandMessage != null) {
@@ -68,6 +87,10 @@ class SmsReceiver(
         }
     }
 
+    private fun processOriginatingAddress(originatingAddress: String?): String? {
+        return originatingAddress?.trim()?.replace(" ", "")?.takeLast(10)
+    }
+
     private fun getSmsMessageData(smsMessage: SmsMessage?): SmsMessageData {
         return SmsMessageData(
             sender = smsMessage?.originatingAddress ?: "Unknown",
@@ -98,7 +121,7 @@ class SmsReceiver(
 
         return if (matchResult != null && matchResult.groupValues.size == 3) {
             SmsMessageData(
-                sender = originatingAddress ?: "Unknown",
+                sender = processOriginatingAddress(originatingAddress) ?: "Unknown",
                 command = matchResult.groupValues[1],
                 rawMessage = messageBody,
                 secretPassword = matchResult.groupValues[2]

@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Telephony
+import android.telephony.ims.ImsRcsManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -16,9 +17,12 @@ import dev.notyouraverage.otpcourier.R
 import dev.notyouraverage.otpcourier.constants.Constants
 import dev.notyouraverage.otpcourier.constants.Constants.CODE_FOREGROUND_SERVICE
 import dev.notyouraverage.otpcourier.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
+import dev.notyouraverage.otpcourier.managers.DataStoreManager
+import dev.notyouraverage.otpcourier.managers.smsCourierPreferenceDataStore
 import dev.notyouraverage.otpcourier.models.SmsMessageData
 import dev.notyouraverage.otpcourier.receivers.SmsReceiver
 import dev.notyouraverage.otpcourier.services.background.SmsService
+import dev.notyouraverage.otpcourier.utils.loadSavedPreferences
 
 
 class MasterService : Service() {
@@ -28,6 +32,8 @@ class MasterService : Service() {
 
     private val stopDelay: Long = 5 * 60 * 1000
     private val handler: Handler = Handler(Looper.getMainLooper())
+    private var secretPassword = ""
+    private var whiteListedPhoneNumber = ""
 
     companion object {
         private val TAG by lazy { MasterService::class.java.simpleName }
@@ -74,6 +80,7 @@ class MasterService : Service() {
 
     private fun sendToBackgroundService(smsMessageData: SmsMessageData?) {
         if (!backgroundServiceRunning || smsMessageData == null) return
+        Log.i(TAG, "Sending SMS to background service")
         Intent(this, SmsService::class.java).also {
             it.action = SmsService.SEND_SMS
             it.putExtra(SmsService.SMS_DATA, smsMessageData)
@@ -83,17 +90,21 @@ class MasterService : Service() {
 
     private fun stopBackgroundService() {
         if (!backgroundServiceRunning) return
+        Log.i(TAG, "Stopping background service")
         Intent(this, SmsService::class.java).also {
             baseContext.stopService(it)
             backgroundServiceRunning = false
-
             handler.removeCallbacksAndMessages(null)
         }
     }
 
     private fun startBackgroundService() {
         if (backgroundServiceRunning) return
+        Log.i(TAG, "Starting background service")
         Intent(this, SmsService::class.java).also {
+            it.putExtra(Constants.TARGET_SMS_CONTACT_NUMBER, whiteListedPhoneNumber)
+            it.action = SmsService.START_SERVICE
+
             baseContext.startService(it)
             backgroundServiceRunning = true
 
@@ -104,10 +115,11 @@ class MasterService : Service() {
     }
 
     private fun startSelf(extras: Bundle?) {
-        smsReceiver = SmsReceiver(
-            extras?.getString(Constants.SECRET_PASSWORD) ?: "",
-            extras?.getString(Constants.WHITE_LISTED_CONTACT_NUMBER) ?: ""
-        )
+        secretPassword = extras?.getString(Constants.SECRET_PASSWORD) ?: ""
+        whiteListedPhoneNumber = extras?.getString(Constants.WHITE_LISTED_CONTACT_NUMBER) ?: ""
+        Log.i(TAG, "Setting secret password as $secretPassword")
+        Log.i(TAG, "Setting whitelisted number as $whiteListedPhoneNumber")
+        smsReceiver = SmsReceiver(secretPassword, whiteListedPhoneNumber)
         baseContext.registerReceiver(
             smsReceiver,
             IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)

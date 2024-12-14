@@ -30,15 +30,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import dev.notyouraverage.otpcourier.R
 import dev.notyouraverage.otpcourier.constants.Constants
 import dev.notyouraverage.otpcourier.managers.DataStoreManager
 import dev.notyouraverage.otpcourier.managers.smsCourierPreferenceDataStore
-import dev.notyouraverage.otpcourier.models.SmsCourierPreference
 import dev.notyouraverage.otpcourier.services.foreground.MasterService
-import kotlinx.coroutines.flow.first
+import dev.notyouraverage.otpcourier.utils.loadSavedPreferences
+import dev.notyouraverage.otpcourier.utils.savePreferences
 import kotlinx.coroutines.launch
 
 @Composable
@@ -168,31 +166,4 @@ fun MainScreen() {
     }
 }
 
-suspend fun savePreferences(
-    secretPassword: String,
-    whiteListedContactNumber: String,
-    datastoreManager: DataStoreManager
-) {
-    datastoreManager.saveToDatastore(
-        SmsCourierPreference(
-            secretPassword = secretPassword,
-            whiteListedContactNumber = whiteListedContactNumber
-        )
-    )
-}
 
-
-suspend fun loadSavedPreferences(
-    preferencesDataStore: DataStore<Preferences>,
-    onResult: (SmsCourierPreference) -> Unit
-) {
-    val preferences = preferencesDataStore.data.first()
-    val secretPassword = preferences[DataStoreManager.SECRET_PASSWORD]
-    val whiteListedContactNumber = preferences[DataStoreManager.WHITELISTED_NUMBER]
-    onResult(
-        SmsCourierPreference(
-            secretPassword = secretPassword ?: "",
-            whiteListedContactNumber = whiteListedContactNumber ?: ""
-        )
-    )
-}
